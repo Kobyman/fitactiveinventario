@@ -1,10 +1,58 @@
 <?php
-    require_once("config/conexion.php");
-    if (isset($_POST["enviar"]) and $_POST["enviar"]=="si"){
-        require_once("models/Usuario.php");
-        $usuario = new Usuario();
-        $usuario->login();
+    // Verificar si se está accediendo directamente al archivo
+    if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) {
+        header("Location: ../404/");
+        exit();
     }
+
+    // Incluir archivos necesarios
+    require_once("config/conexion.php"); // Archivo de conexión a la base de datos
+    require_once("models/Usuario.php"); // Modelo de usuario
+
+    // Inicializar variables
+    $error = ""; // Mensaje de error
+    $com_id = null; // ID de la compañía
+
+    // Verificar si el parámetro 'c' está definido y es un número entero
+    if (!isset($_GET['c'])) { // Si el parámetro 'c' no está definido
+        $error .= "Error: El parámetro 'c' no está definido en la URL.<br>"; // Agregar mensaje de error
+    } elseif (!is_numeric($_GET['c'])) { // Si el parámetro 'c' no es un número
+        $error .= "Error: El parámetro 'c' debe ser un número entero.<br>"; // Agregar mensaje de error
+    } else { // Si el parámetro 'c' está definido y es un número
+        $com_id = intval($_GET['c']); // Convertir el parámetro 'c' a un entero
+    }
+
+    // Verificar si se ha enviado el formulario de login
+    if (isset($_POST["enviar"]) && $_POST["enviar"] == "si") { // Si se ha enviado el formulario
+        // Validar que los campos del formulario no estén vacíos
+        if (!isset($_POST['emp_id']) || empty($_POST['emp_id'])) { // Si el campo 'emp_id' está vacío
+            $error .= "Error: El campo 'Empresa' es requerido.<br>"; // Agregar mensaje de error
+        }
+        if (!isset($_POST['suc_id']) || empty($_POST['suc_id'])) { // Si el campo 'suc_id' está vacío
+            $error .= "Error: El campo 'Sucursal' es requerido.<br>"; // Agregar mensaje de error
+        }
+        if (!isset($_POST['usu_correo']) || empty($_POST['usu_correo'])) { // Si el campo 'usu_correo' está vacío
+            $error .= "Error: El campo 'Correo Electronico' es requerido.<br>"; // Agregar mensaje de error
+        }
+        //Validar que el correo sea un formato valido
+        if (!filter_var($_POST['usu_correo'], FILTER_VALIDATE_EMAIL)) { // Si el correo no es válido
+            $error .= "Error: El campo 'Correo Electronico' no es valido.<br>"; // Agregar mensaje de error
+        }
+        if (!isset($_POST['usu_pass']) || empty($_POST['usu_pass'])) { // Si el campo 'usu_pass' está vacío
+            $error .= "Error: El campo 'Contraseña' es requerido.<br>"; // Agregar mensaje de error
+        }
+        // Si no hay errores, procesar el login
+        if (empty($error)) { // Si no hay errores
+        $usuario = new Usuario();
+        $loginResult = $usuario->login($com_id); // Llamar al método login del modelo Usuario
+            if(is_array($loginResult)){
+                $error .= $loginResult["error"];
+            }
+        } 
+
+       
+    }
+
 ?>
 
 <!doctype html>
@@ -36,6 +84,12 @@
         <div class="bg-overlay"></div>
 
         <div class="auth-page-content overflow-hidden pt-lg-5">
+            <?php if (!empty($error)) { ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php echo $error; ?>
+                </div>
+            <?php } ?>
+
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
@@ -82,16 +136,14 @@
                                         </div>
 
                                         <div class="mt-4">
-                                            <form action="" method="post" id="login_form">
+                                            <form action="<?php echo $_SERVER['PHP_SELF'] . '?c=' . $com_id; ?>" method="post" id="login_form">
 
                                                 <div class="mb-3">
                                                     <label for="emp_id" class="form-label">Empresa</label>
                                                     <select type="text" class="form-control form-select" name="emp_id" id="emp_id" aria-label="Seleccionar">
-                                                        <option selected>Seleccionar</option>
-
                                                     </select>
-                                                </div>
-
+                                                </div> 
+                                                
                                                 <div class="mb-3">
                                                     <label for="suc_id" class="form-label">Sucursal</label>
                                                     <select type="text" class="form-control form-select" name="suc_id" id="suc_id" aria-label="Seleccionar">
@@ -171,6 +223,6 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script type="text/javascript" src="login.js"></script>
-</body>
+</body> 
 
 </html>

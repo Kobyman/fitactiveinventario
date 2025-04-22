@@ -1,20 +1,37 @@
 <?php
-    /* TODO: Inicio de Session */
+// Avoid direct access to the file
+if (!defined('ACCESS')) {
+    die('Direct access is not allowed');
+}
+
+/* TODO: Start Session */
     session_start();
     class Conectar{
         protected $dbh;
+        /* TODO: Database connection variables */
+        private $db_host = "localhost";
+        private $db_name = "compraventa";
+        private $db_user = "root";
+        private $db_pass = "";
 
+        /* TODO: Database connection */
         protected function Conexion(){
             try{
-                /* TODO: Cadena de Conexion */
-                $conectar = $this->dbh=new PDO("sqlsrv:Server=localhost;Database=CompraVenta","sa","andersonxx");
-                //$conectar = $this->dbh=new PDO("sqlsrv:server = tcp:andercode01.database.windows.net,1433; Database = compraventa01","andercode","Anderson1987");
+                /* TODO: Connection String to MySQL */
+                $conectar = $this->dbh=new PDO("mysql:host=$this->db_host;dbname=$this->db_name;charset=utf8", $this->db_user, $this->db_pass);
                 return $conectar;
             }catch (Exception $e){
-                /* TODO: En caso de error mostrar mensaje */
-                print "Error Conexion BD". $e->getMessage() ."<br/>";
+                /* TODO: Error Handling, show only a generic error to the user */
+                error_log("Error Conexion BD: " . $e->getMessage());
+                print "Error en la conexión a la base de datos. Contacte al administrador.<br/>";
                 die();
             }
+        }
+
+        /* Avoid direct access to the file */
+        public function __construct()
+        {
+             define('ACCESS', true);
         }
 
         public static function ruta(){

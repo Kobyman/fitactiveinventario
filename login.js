@@ -1,26 +1,49 @@
-$(document).ready(function(){
-
+function init(){
+    
     var com_id = getUrlParameter('c');
 
+    //Initialize Selects
     $('#emp_id').select2();
-
     $('#suc_id').select2();
 
-    $.post("controller/empresa.php?op=combo",{com_id:com_id},function(data){
-        console.log(data);
-        $("#emp_id").html(data);
-    });
+    //Load companies
+    loadCompanies(com_id);
 
+    //When company select change, load branches
     $("#emp_id").change(function(){
         $("#emp_id").each(function(){
             emp_id = $(this).val();
-
-            $.post("controller/sucursal.php?op=combo",{emp_id:emp_id},function(data){
-                $("#suc_id").html(data);
-            });
+            loadBranches(emp_id)
         });
     });
-});
+}
+
+function loadCompanies(com_id) {
+    $.post("controller/empresa.php?op=combo",{com_id:com_id},function(data) {
+        $("#emp_id").html(data);
+    });
+}
+
+function loadBranches(emp_id) {
+    $.post("controller/sucursal.php?op=combo",{emp_id:emp_id},function(data){
+        $("#suc_id").html(data);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* TODO: Obtener parametro de URL */
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -37,3 +60,6 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 };
+
+
+init();

@@ -1,13 +1,23 @@
 <?php
-    require_once("../../config/conexion.php");
-    require_once("../../models/Rol.php");
-    $rol = new Rol();
-    $datos = $rol->validar_acceso_rol($_SESSION["USU_ID"],"mntusuario");
-    if(isset($_SESSION["USU_ID"])){
+    // Avoid direct access to the file
+    if(!defined('ROOT_PATH')){
+        define('ROOT_PATH', dirname(dirname(__FILE__)) . '/');
+    }
+    // Include the connection and the Rol model
+    require_once(ROOT_PATH . "../../config/conexion.php");
+    require_once(ROOT_PATH . "../../models/Rol.php");
+    
+    // Check if the session is started
+    if(isset($_SESSION["USU_ID"])){ 
+        // Initialize the Rol model
+        $rol = new Rol();
+        // Check if the user has the required role to access to this page
+        $datos = $rol->validar_acceso_rol($_SESSION["USU_ID"],"mntusuario");
         if(is_array($datos) and count($datos)>0){
 ?>
 <!doctype html>
 <html lang="es" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none">
+
 <head>
     <title>AnderCode | Usuario</title>
     <?php require_once("../html/head.php"); ?>
@@ -54,7 +64,6 @@
                                                 <th>Apellido</th>
                                                 <th>DNI</th>
                                                 <th>Telefono</th>
-                                                <th>Contraseña</th>
                                                 <th>Rol</th>
                                                 <th>FechaCreacion</th>
                                                 <th></th>
@@ -80,12 +89,13 @@
 
     <?php require_once("mantenimiento.php"); ?>
 
-    <?php require_once("../html/js.php"); ?>
-    <script type="text/javascript" src="mntusuario.js"></script>
+    <?php require_once("../html/js.php");?>
+    <script type="text/javascript" src="mntusuario.js"></script> 
 </body>
 
 </html>
 <?php
+        // if the user has not the rigth access
         }else{
             header("Location:".Conectar::ruta()."view/404/");
         }
